@@ -1,0 +1,23 @@
+{
+  "name": "sugarcommerce/health",
+  "description": "The mechanism of a doctor script: collect ok/warn/fail checks, print an aligned report, exit non-zero on failure so a deploy can be gated on it, and post the failures to a chat webhook. The checks themselves stay in your application.",
+  "version": "1.0.0",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/sugarcommerce/health",
+  "authors": [ { "name": "David Sherlock", "homepage": "https://arraypress.com/" } ],
+  "keywords": ["health", "doctor", "diagnostics", "alerts", "deploy"],
+  "require": {
+    "php": ">=8.5",
+    "sugarcommerce/http-client": "^1.0"
+  },
+  "require-dev": { "phpunit/phpunit": "^13.0" },
+  "autoload": { "psr-4": { "SugarCommerce\\Health\\": "src/" } },
+  "autoload-dev": { "psr-4": { "SugarCommerce\\Health\\Tests\\": "tests/" } },
+  "repositories": [ { "type": "path", "url": "../*", "options": { "symlink": true } } ],
+  "scripts": { "test": "phpunit" },
+  "config": { "optimize-autoloader": true, "sort-packages": true, "preferred-install": "dist" },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "support": { "issues": "https://github.com/sugarcommerce/health/issues", "source": "https://github.com/sugarcommerce/health" }
+}
