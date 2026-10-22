@@ -20,7 +20,7 @@ Every installable application grows a `doctor` — a list of questions a custome
 - 🧮 **`all_or_none()`** — the optional-feature check: on, off (with how to turn it on), or half set up (with what is missing).
 - 🖨️ **`render()`** — a heading, aligned rows and a tally.
 - 🚪 **`exit_code()`** — 1 on any failure, so a deploy can be gated on it; warnings never block.
-- 📣 **`Alert`** — one JSON body that Slack, ntfy and Discord all read; five-second timeout; never throws.
+- 📣 **`Alert`** — one JSON body that Slack, ntfy and Discord all read; five-second timeout; never throws. Passwords in URLs and secret-named query parameters are redacted, mentions page nobody, and the text is capped under Discord's 2,000 characters.
 - 🛡️ **SSRF guard stays on** — the webhook URL is configuration, and configuration can be wrong.
 
 ## Requirements

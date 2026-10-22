@@ -27,8 +27,19 @@ namespace SugarCommerce\Health;
  */
 enum Level: string {
 
-	case Ok   = 'ok';
+	/**
+	 * Works.
+	 */
+	case Ok = 'ok';
+
+	/**
+	 * Works, or is off on purpose, but somebody should know.
+	 */
 	case Warn = 'warn';
+
+	/**
+	 * Something a customer will run into. A deploy is gated on these.
+	 */
 	case Fail = 'fail';
 
 	/**

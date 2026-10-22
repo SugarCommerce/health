@@ -190,8 +190,13 @@ final class Report {
 	public function render( string $title ): string {
 		$text = "\n" . $title . "\n\n";
 
+		// One row per check: a line break or a terminal escape in a label or
+		// detail — an error message, say — cannot start a row of its own or
+		// rewrite what the terminal shows.
+		$line = static fn ( string $text ): string => (string) preg_replace( '/[\x00-\x1F\x7F]+/', ' ', $text );
+
 		foreach ( $this->results as $result ) {
-			$text .= sprintf( "%s %-28s %s\n", Level::from( $result['level'] )->icon(), $result['label'], $result['detail'] );
+			$text .= sprintf( "%s %-28s %s\n", Level::from( $result['level'] )->icon(), $line( $result['label'] ), $line( $result['detail'] ) );
 		}
 
 		$counts = $this->counts();

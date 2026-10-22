@@ -1,7 +1,7 @@
 {
   "name": "sugarcommerce/health",
   "description": "The mechanism of a doctor script: collect ok/warn/fail checks, print an aligned report, exit non-zero on failure so a deploy can be gated on it, and post the failures to a chat webhook. The checks themselves stay in your application.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "library",
   "license": "GPL-2.0-or-later",
   "homepage": "https://github.com/sugarcommerce/health",

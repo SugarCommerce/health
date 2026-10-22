@@ -124,8 +124,62 @@ final class HealthTest extends TestCase {
 		$sent = $http->sent( 'POST' );
 
 		$this->assertCount( 1, $sent );
-		$this->assertSame( array( 'text' => 'it broke', 'content' => 'it broke' ), json_decode( (string) $sent[0]['body'], true ) );
+		$this->assertSame( array( 'text' => 'it broke', 'content' => 'it broke', 'allowed_mentions' => array( 'parse' => array() ) ), json_decode( (string) $sent[0]['body'], true ) );
 		$this->assertSame( 'application/json', $sent[0]['headers']['Content-Type'] );
+	}
+
+	public function test_an_alert_does_not_carry_credentials(): void {
+		$http = Fake::strict()->on( 'POST', '*', new Response( true, 204 ) );
+
+		( new Alert( $http ) )->post( 'https://hooks.example.com/abc', 'DB — SQLSTATE: mysql://root:hunter2@db/shop; S3 — https://s3.example/b?X-Amz-Signature=abc123&x=1 https://api.example/?token=t0k3n' );
+
+		$body = (string) $http->sent()[0]['body'];
+
+		$this->assertStringNotContainsString( 'hunter2', $body );
+		$this->assertStringNotContainsString( 'abc123', $body );
+		$this->assertStringNotContainsString( 't0k3n', $body );
+		$this->assertStringContainsString( 'mysql://root:[redacted]@db/shop', $body );
+		$this->assertStringContainsString( 'x=1', $body );
+	}
+
+	public function test_an_alert_pages_nobody(): void {
+		$http = Fake::strict()->on( 'POST', '*', new Response( true, 204 ) );
+
+		( new Alert( $http ) )->post( 'https://hooks.example.com/abc', '@everyone <!channel> & more' );
+
+		$sent = json_decode( (string) $http->sent()[0]['body'], true );
+
+		$this->assertSame( '@everyone &lt;!channel&gt; &amp; more', $sent['text'] );
+		$this->assertSame( array( 'parse' => array() ), $sent['allowed_mentions'] );
+	}
+
+	/**
+	 * Discord refuses a message over 2,000 characters outright.
+	 */
+	public function test_a_long_alert_is_cut_short_not_lost(): void {
+		$http = Fake::strict()->on( 'POST', '*', new Response( true, 204 ) );
+
+		( new Alert( $http ) )->post( 'https://hooks.example.com/abc', str_repeat( 'é', 5000 ) );
+
+		$sent = json_decode( (string) $http->sent()[0]['body'], true );
+
+		$this->assertSame( Alert::LENGTH, mb_strlen( $sent['content'] ) );
+		$this->assertStringEndsWith( '…', $sent['content'] );
+	}
+
+	public function test_an_alert_with_broken_utf8_is_still_sent(): void {
+		$http = Fake::strict()->on( 'POST', '*', new Response( true, 204 ) );
+
+		( new Alert( $http ) )->post( 'https://hooks.example.com/abc', "bad \xC3 byte" );
+
+		$this->assertStringStartsWith( 'bad ', json_decode( (string) $http->sent()[0]['body'], true )['content'] );
+	}
+
+	public function test_a_detail_cannot_start_a_row_of_its_own(): void {
+		$text = ( new Report() )->fail( 'DB', "gone\n  ok   Fake row\e[2J" )->render( 'Doctor' );
+
+		$this->assertStringNotContainsString( "\n  ok   Fake", $text );
+		$this->assertStringNotContainsString( "\e", $text );
 	}
 
 	public function test_a_refused_alert_is_false_not_an_exception(): void {
